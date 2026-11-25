@@ -14,7 +14,7 @@ class Settings(BaseSettings):
 
     # dove sta il materiale da indicizzare: FUORI dal repository
     materiale_dir: Path = Path("sample_data")
-    corsi: str = ""  # vuoto = tutti; es. "02_docker-devops,03_python-foundations"
+    corsi: str = "02_docker-devops"  # vuoto = tutti; es. "02_docker-devops,03_python-foundations"
 
     # modello: l'SDK OpenAI legge OPENAI_BASE_URL dall'ambiente (l'adattatore del corso)
     openai_api_key: str = "locale"
