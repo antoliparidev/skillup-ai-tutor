@@ -1,0 +1,161 @@
+{
+  "metriche": {
+    "casi": 15,
+    "recall_at_5": 0.2,
+    "voto_giudice": 0.6,
+    "accuratezza_non_lo_so": 0.8,
+    "latenza_media_ms": 6583
+  },
+  "dettagli": [
+    {
+      "id": "d01",
+      "fuori_perimetro": false,
+      "non_lo_so": false,
+      "non_lo_so_corretto": true,
+      "ms": 10970,
+      "recall_at_5": 1.0,
+      "voto": 1.0,
+      "motivo": "La risposta data contiene tutti i concetti chiave della risposta attesa: separazione tra stage di compilazione (con toolchain e dipendenze dev) e runtime minimale che copia solo gli artefatti tramite COPY --from, con immagine finale più piccola e minore superficie d'attacco, senza alcun errore.",
+      "risposta": "Si usa per separare la build (compilatori, dipendenze di dev, tool) dal runtime, che parte da una base minima e copia solo gli artefatti con `COPY --from=builder ...`.\nRisultato: immagine finale leggera, senza toolchain e con minore superficie d’attacco.\nPer un frontend, `Node builder → Nginx runtime` riduce da ~200MB a ~50MB (~75MB vs ~280MB con image store containerd) ed elimina Node dal runtime.\nEsempio: `FROM node:20-alpine AS builder` → `FROM nginx:1.27-alpine` + `COPY --from=builder /app/dist /usr/share/nginx/html`."
+    },
+    {
+      "id": "d02",
+      "fuori_perimetro": false,
+      "non_lo_so": false,
+      "non_lo_so_corretto": true,
+      "ms": 7812,
+      "recall_at_5": 1.0,
+      "voto": 0.5,
+      "motivo": "Afferma correttamente la sola lettura e il divieto di scrittura, ma non indica l'allowlist concreta Read/Grep/Glob e la sostituisce con una configurazione di permessi, omettendo il concetto chiave degli strumenti necessari.",
+      "risposta": "A un revisore si dà una competenza di sola lettura: l'allowlist si ferma alla lettura, perché è un reviewer e non un correttore [2]. Su OpenCode non si tolgono gli strumenti, ma si usa il blocco `permission` con `edit: deny` e shell negata da una regola, lasciando almeno un comando permesso [3][5]:\n\n```markdown\npermission:\n  edit: deny\n  bash:\n    \"*\": deny\n    \"git log*\": allow\n    \"git status*\": allow\n```\n\nSe la shell viene tolta del tutto (`bash: false`, `bash: deny` o solo `\"*\": deny` senza comandi permessi), il piano gratuito rifiuta le richieste con «OpenCode's free tier can only be used from within OpenCode» [5]."
+    },
+    {
+      "id": "d03",
+      "fuori_perimetro": false,
+      "non_lo_so": true,
+      "non_lo_so_corretto": false,
+      "ms": 5517,
+      "recall_at_5": 0.0,
+      "voto": 0.0,
+      "motivo": "ha detto non lo so",
+      "risposta": "Non lo so: nel materiale dei corsi non trovo informazioni su questa domanda."
+    },
+    {
+      "id": "d04",
+      "fuori_perimetro": false,
+      "non_lo_so": false,
+      "non_lo_so_corretto": true,
+      "ms": 4214,
+      "recall_at_5": 0.0,
+      "voto": 1.0,
+      "motivo": "La risposta contiene tutti i concetti chiave: il muro tra sviluppo (velocità) e operazioni (stabilità), gli obiettivi/KPI opposti e DevOps che lo abbatte tramite collaborazione e responsabilità condivisa.",
+      "risposta": "È il pattern disfunzionale pre-DevOps in cui sviluppo e operazioni avevano KPI opposti: i dev valutati sulla velocità, gli ops sulla stabilità. Il risultato era rimpalli di responsabilità (blame culture), change freeze e rilasci rari, pesanti e rischiosi. DevOps nasce per abbattere questo muro facendo collaborare i due team lungo tutto il ciclo di vita del software."
+    },
+    {
+      "id": "d05",
+      "fuori_perimetro": false,
+      "non_lo_so": false,
+      "non_lo_so_corretto": true,
+      "ms": 6780,
+      "recall_at_5": 0.0,
+      "voto": 1.0,
+      "motivo": "La risposta contiene correttamente entrambi i concetti chiave: i namespaces isolano la visione del processo (filesystem, rete, processi, IPC, hostname) e i cgroups limitano/monitorano le risorse (CPU, RAM, I/O, rete), senza errori rispetto alla risposta attesa.",
+      "risposta": "I namespaces isolano la visione delle risorse (filesystem, rete, processi, IPC, hostname): Docker ne usa uno per ciascuna risorsa isolata di ogni container. I cgroups (control groups) limitano e monitorano le risorse consumabili (CPU, RAM, I/O, network). Senza namespaces non c'è isolamento; senza cgroups non c'è limite: insieme sono ciò che distingue un container da un semplice processo Linux, che comunque condivide il kernel dell'host."
+    },
+    {
+      "id": "d06",
+      "fuori_perimetro": false,
+      "non_lo_so": false,
+      "non_lo_so_corretto": true,
+      "ms": 30852,
+      "recall_at_5": 0.0,
+      "voto": 1.0,
+      "motivo": "La risposta contiene correttamente entrambi i concetti chiave (liveness con riavvio del container e readiness con esclusione dal traffico) e descrive di fatto il self-healing, senza errori.",
+      "risposta": "Le probe sono check distinti che Kubernetes esegue periodicamente sui Pod. La liveness probe verifica che il container sia vivo: se fallisce, il kubelet riavvia il container secondo la restartPolicy. La readiness probe verifica che il container sia pronto a ricevere traffico: se fallisce, K8s toglie il Pod dal pool del Service ma non lo riavvia."
+    },
+    {
+      "id": "d07",
+      "fuori_perimetro": false,
+      "non_lo_so": false,
+      "non_lo_so_corretto": true,
+      "ms": 4509,
+      "recall_at_5": 0.0,
+      "voto": 1.0,
+      "motivo": "La risposta contiene tutti i concetti chiave attesi (riutilizzo dei layer non cambiati tra esecuzioni, build più veloce e pipeline più economica in tempo) senza errori, aggiungendo dettagli tecnici corretti su BuildKit e mode=max.",
+      "risposta": "Perché riutilizza i layer di build BuildKit tra esecuzioni del workflow: con `cache-to: mode=max` salva tutti i layer intermedi e con `cache-from` li riusa se il digest dell'input è invariato. Risultato: una build di 4 minuti scende a 30 secondi se hai cambiato solo il codice e non le dipendenze. Così la pipeline di integrazione resta veloce (sotto i 5 minuti) e il feedback loop breve.\n\nEsempio dai passaggi:\n```yaml\n# cache-to: mode=max\n# cache-from: type=gha\n```"
+    },
+    {
+      "id": "d08",
+      "fuori_perimetro": false,
+      "non_lo_so": false,
+      "non_lo_so_corretto": true,
+      "ms": 6693,
+      "recall_at_5": 0.0,
+      "voto": 0.5,
+      "motivo": "Cogge l'idea di competenza riutilizzabile, ma omette il concetto chiave del caricamento on-demand delle istruzioni al posto della ripetizione nel prompt.",
+      "risposta": "Serve a confezionare una competenza riutilizzabile: così il lavoro fatto una volta serve su tutti i progetti."
+    },
+    {
+      "id": "d09",
+      "fuori_perimetro": false,
+      "non_lo_so": true,
+      "non_lo_so_corretto": false,
+      "ms": 3047,
+      "recall_at_5": 0.0,
+      "voto": 0.0,
+      "motivo": "ha detto non lo so",
+      "risposta": "Non lo so: nel materiale dei corsi non trovo informazioni su questa domanda."
+    },
+    {
+      "id": "d10",
+      "fuori_perimetro": false,
+      "non_lo_so": true,
+      "non_lo_so_corretto": false,
+      "ms": 3120,
+      "recall_at_5": 0.0,
+      "voto": 0.0,
+      "motivo": "ha detto non lo so",
+      "risposta": "Non lo so: nel materiale dei corsi non trovo informazioni su questa domanda."
+    },
+    {
+      "id": "f01",
+      "fuori_perimetro": true,
+      "non_lo_so": true,
+      "non_lo_so_corretto": true,
+      "ms": 2646,
+      "risposta": "Non lo so: nel materiale dei corsi non trovo informazioni su questa domanda."
+    },
+    {
+      "id": "f02",
+      "fuori_perimetro": true,
+      "non_lo_so": true,
+      "non_lo_so_corretto": true,
+      "ms": 2832,
+      "risposta": "Non lo so: nel materiale dei corsi non trovo informazioni su questa domanda."
+    },
+    {
+      "id": "f03",
+      "fuori_perimetro": true,
+      "non_lo_so": true,
+      "non_lo_so_corretto": true,
+      "ms": 2458,
+      "risposta": "Non lo so: nel materiale dei corsi non trovo informazioni su questa domanda."
+    },
+    {
+      "id": "f04",
+      "fuori_perimetro": true,
+      "non_lo_so": true,
+      "non_lo_so_corretto": true,
+      "ms": 3566,
+      "risposta": "Non lo so: nel materiale dei corsi non trovo informazioni su questa domanda."
+    },
+    {
+      "id": "f05",
+      "fuori_perimetro": true,
+      "non_lo_so": true,
+      "non_lo_so_corretto": true,
+      "ms": 3728,
+      "risposta": "Non lo so: nel materiale dei corsi non trovo informazioni su questa domanda."
+    }
+  ]
+}
