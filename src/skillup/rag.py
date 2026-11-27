@@ -34,8 +34,8 @@ async def cerca(
     s: AsyncSession, domanda: str, corso_id: str | None = None, k: int | None = None
 ) -> list[Passaggio]:
     """I k passaggi più vicini alla domanda. Il filtro per corso sta nel WHERE della query."""
-    [vettore] = await llm.embed([f"search_query: {domanda}"])
-    distanza = Chunk.embedding.cosine_distance(vettore)
+    [vettore] = await llm.embed([f"search_query: {domanda}"]) #Crea l'embedding della domanda ovvero la trasforma in vettori
+    distanza = Chunk.embedding.cosine_distance(vettore) #Chiede al database i chunk con la distanza coseno più piccola e prende i primi top_k
     query = select(Chunk, distanza.label("distanza")).order_by(distanza).limit(k or settings.top_k)
     if corso_id:
         query = query.where(Chunk.corso_id == corso_id)
